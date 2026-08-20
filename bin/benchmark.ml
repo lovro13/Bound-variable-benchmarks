@@ -18,8 +18,8 @@ let print_times name heading times =
 let rec assert_naive_capture_body index = function
   | Naive.App (Naive.Var variable, rest) ->
       assert (variable = "a" ^ string_of_int index);
-      assert_naive_capture_body (index - 1) rest
-  | Naive.Var "y" -> assert (index = 0)
+      assert_naive_capture_body (index + 1) rest
+  | Naive.Var "y" -> assert (index = 101)
   | _ -> assert false
 
 let rec assert_naive_lambdas remaining assert_body = function
@@ -30,7 +30,7 @@ let rec assert_naive_lambdas remaining assert_body = function
 
 let assert_naive_result test result =
   match test with
-  | 0 -> assert_naive_lambdas 100 (assert_naive_capture_body 100) result
+  | 0 -> assert_naive_lambdas 100 (assert_naive_capture_body 1) result
   | 2 ->
       assert_naive_lambdas 500
         (function Naive.Var "z" -> () | _ -> assert false)
@@ -46,8 +46,8 @@ let assert_naive_result test result =
 let rec assert_debruijn_capture_body index = function
   | Debruijn.App (Debruijn.Var variable, rest) ->
       assert (variable = index);
-      assert_debruijn_capture_body (index - 1) rest
-  | Debruijn.Var variable -> assert (index = 99 && variable = 200)
+      assert_debruijn_capture_body (index + 1) rest
+  | Debruijn.Var variable -> assert (index = 200 && variable = 200)
   | _ -> assert false
 
 let rec assert_debruijn_lambdas remaining assert_body = function
@@ -58,7 +58,7 @@ let rec assert_debruijn_lambdas remaining assert_body = function
 
 let assert_debruijn_result test result =
   match test with
-  | 0 -> assert_debruijn_lambdas 100 (assert_debruijn_capture_body 199) result
+  | 0 -> assert_debruijn_lambdas 100 (assert_debruijn_capture_body 100) result
   | 2 ->
       assert_debruijn_lambdas 500
         (function Debruijn.Var 500 -> () | _ -> assert false)
@@ -74,8 +74,8 @@ let assert_debruijn_result test result =
 let rec assert_hoas_capture_body index = function
   | Hoas.App (Hoas.Var variable, rest) ->
       assert (variable = "a" ^ string_of_int index);
-      assert_hoas_capture_body (index - 1) rest
-  | Hoas.Var "y" -> assert (index = 0)
+      assert_hoas_capture_body (index + 1) rest
+  | Hoas.Var "y" -> assert (index = 101)
   | _ -> assert false
 
 let rec assert_hoas_lambdas remaining assert_body = function
@@ -86,7 +86,7 @@ let rec assert_hoas_lambdas remaining assert_body = function
 
 let assert_hoas_result test result =
   match test with
-  | 0 -> assert_hoas_lambdas 100 (assert_hoas_capture_body 100) result
+  | 0 -> assert_hoas_lambdas 100 (assert_hoas_capture_body 1) result
   | 2 ->
       assert_hoas_lambdas 500
         (function Hoas.Var "z" -> () | _ -> assert false)
@@ -102,8 +102,8 @@ let assert_hoas_result test result =
 let rec assert_bindlib_capture_body index = function
   | Bindlib_lambda.App (Bindlib_lambda.Var variable, rest) ->
       assert (Bindlib.name_of variable = "a" ^ string_of_int index);
-      assert_bindlib_capture_body (index - 1) rest
-  | Bindlib_lambda.Var variable -> assert (index = 0 && Bindlib.name_of variable = "y")
+      assert_bindlib_capture_body (index + 1) rest
+  | Bindlib_lambda.Var variable -> assert (index = 101 && Bindlib.name_of variable = "y")
   | _ -> assert false
 
 let rec assert_bindlib_lambdas remaining assert_body = function
@@ -115,7 +115,7 @@ let rec assert_bindlib_lambdas remaining assert_body = function
 
 let assert_bindlib_result test result =
   match test with
-  | 0 -> assert_bindlib_lambdas 100 (assert_bindlib_capture_body 100) result
+  | 0 -> assert_bindlib_lambdas 100 (assert_bindlib_capture_body 1) result
   | 2 ->
       assert_bindlib_lambdas 500
         (function
