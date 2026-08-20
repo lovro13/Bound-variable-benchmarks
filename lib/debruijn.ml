@@ -1,5 +1,4 @@
-(* The core de Bruijn implementation corresponds to the implementation in the thesis.
-   The evaluator is named [eval_weak] here because this file is also used by the benchmark. *)
+(* The core de Bruijn implementation corresponds to the implementation in the thesis. *)
 
 type term =
   | Var of int
@@ -16,16 +15,16 @@ let rec subst index replacement = function
   | Lam (name, body) -> Lam (name, subst (index + 1) (shift 1 0 replacement) body)
   | App (left, right) -> App (subst index replacement left, subst index replacement right)
 
-let rec eval_weak = function
+let rec eval = function
   | (Var _ | Lam _) as term -> term
   | App (left, argument) ->
-      match eval_weak left with
+      match eval left with
       | Lam (_, body) ->
-          let evaluated_argument = eval_weak argument in
+          let evaluated_argument = eval argument in
           let shifted_argument = shift 1 0 evaluated_argument in
           let substituted_body = subst 0 shifted_argument body in
-          eval_weak (shift (-1) 0 substituted_body)
-      | left' -> App (left', eval_weak argument)
+          eval (shift (-1) 0 substituted_body)
+      | left' -> App (left', eval argument)
 
 let identity = Lam ("x", Var 0)
 let church n =

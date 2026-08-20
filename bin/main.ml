@@ -4,10 +4,10 @@ let print_term label term =
   Printf.printf "%s: %s\n" label (to_string term)
 
 let print_weak_eval label term =
-  Printf.printf "%s weak: %s\n" label (to_string (eval_weak term))
+  Printf.printf "%s weak: %s\n" label (to_string (eval term))
 
 let print_eval label term =
-  Printf.printf "%s strong: %s\n" label (to_string (eval term))
+  Printf.printf "%s strong: %s\n" label (to_string (strong_eval term))
 
 let true_term =
   let t = var "t" in

@@ -36,12 +36,12 @@ let subst variable replacement term =
   in
   go variable replacement free_replacement term
 
-let rec eval_weak = function
+let rec eval = function
   | App (left, argument) ->
       begin
-        match eval_weak left with
-        | Lam (variable, body) -> eval_weak (subst variable (eval_weak argument) body)
-        | left' -> App (left', eval_weak argument)
+        match eval left with
+        | Lam (variable, body) -> eval (subst variable (eval argument) body)
+        | left' -> App (left', eval argument)
       end
   | t -> t
 

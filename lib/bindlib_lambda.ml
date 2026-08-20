@@ -37,23 +37,9 @@ let rec to_string_with ctxt = function
 let to_string term = to_string_with (Bindlib.free_vars (lift_term term)) term
 
 (* Weak evaluation stops once it reaches a lambda at the head position. *)
-let rec eval_weak = function
-  | Var _ as term -> term
-  | Lam _ as term -> term
-  | App (left, argument) ->
-      begin
-        match eval_weak left with
-        | Lam abstraction -> eval_weak (Bindlib.subst abstraction (eval_weak argument))
-        | reduced_left -> App (reduced_left, eval_weak argument)
-      end
-
-(* Strong evaluation also reduces inside lambda bodies. *)
 let rec eval = function
   | Var _ as term -> term
-  | Lam abstraction ->
-      let (bound_var, body) = Bindlib.unbind abstraction in
-      (* Rebuild the abstraction after normalizing underneath the lambda. *)
-      Bindlib.unbox (box_abs bound_var (lift_term (eval body)))
+  | Lam _ as term -> term
   | App (left, argument) ->
       begin
         match eval left with
@@ -61,8 +47,21 @@ let rec eval = function
         | reduced_left -> App (reduced_left, eval argument)
       end
 
-let eval = eval
-let normalize = eval
+(* Strong evaluation also reduces inside lambda bodies. *)
+let rec strong_eval = function
+  | Var _ as term -> term
+  | Lam abstraction ->
+      let (bound_var, body) = Bindlib.unbind abstraction in
+      (* Rebuild the abstraction after normalizing underneath the lambda. *)
+      Bindlib.unbox (box_abs bound_var (lift_term (strong_eval body)))
+  | App (left, argument) ->
+      begin
+        match strong_eval left with
+        | Lam abstraction -> strong_eval (Bindlib.subst abstraction (strong_eval argument))
+        | reduced_left -> App (reduced_left, strong_eval argument)
+      end
+
+let normalize = strong_eval
 
 let church n =
   let successor = var "s" in

@@ -54,36 +54,36 @@ let () =
             let term = Naive.build test in
             build_times := Unix.gettimeofday () -. build_start :: !build_times;
             let evaluation_start = Unix.gettimeofday () in
-            let _ = Naive.eval_weak term in
+            let _ = Naive.eval term in
             evaluation_times := Unix.gettimeofday () -. evaluation_start :: !evaluation_times
         | 1 ->
             let build_start = Unix.gettimeofday () in
             let term = Debruijn.build test in
             build_times := Unix.gettimeofday () -. build_start :: !build_times;
             let evaluation_start = Unix.gettimeofday () in
-            let _ = Debruijn.eval_weak term in
+            let _ = Debruijn.eval term in
             evaluation_times := Unix.gettimeofday () -. evaluation_start :: !evaluation_times
         | 2 ->
             let build_start = Unix.gettimeofday () in
             let term = Hoas.build test in
             build_times := Unix.gettimeofday () -. build_start :: !build_times;
             let evaluation_start = Unix.gettimeofday () in
-            let _ = Hoas.eval_weak term in
+            let _ = Hoas.eval term in
             evaluation_times := Unix.gettimeofday () -. evaluation_start :: !evaluation_times
         | _ ->
             let build_start = Unix.gettimeofday () in
             let term = Bindlib_lambda.build test in
             build_times := Unix.gettimeofday () -. build_start :: !build_times;
             let evaluation_start = Unix.gettimeofday () in
-            let _ = Bindlib_lambda.eval_weak term in
+            let _ = Bindlib_lambda.eval term in
             evaluation_times := Unix.gettimeofday () -. evaluation_start :: !evaluation_times
       done;
       begin
         match implementation with
-        | 0 -> assert_naive_result test (Naive.eval_weak (Naive.build test))
-        | 1 -> assert_debruijn_result test (Debruijn.eval_weak (Debruijn.build test))
-        | 2 -> assert_hoas_result test (Hoas.eval_weak (Hoas.build test))
-        | _ -> assert_bindlib_result test (Bindlib_lambda.eval_weak (Bindlib_lambda.build test))
+        | 0 -> assert_naive_result test (Naive.eval (Naive.build test))
+        | 1 -> assert_debruijn_result test (Debruijn.eval (Debruijn.build test))
+        | 2 -> assert_hoas_result test (Hoas.eval (Hoas.build test))
+        | _ -> assert_bindlib_result test (Bindlib_lambda.eval (Bindlib_lambda.build test))
       end;
       print_times names.(implementation) "build" !build_times;
       print_times names.(implementation) "evaluation" !evaluation_times

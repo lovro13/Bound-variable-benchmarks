@@ -3,12 +3,12 @@ type term =
   | Lam of (term -> term)
   | App of term * term
 
-let rec eval_weak = function
+let rec eval = function
   | (Var _ | Lam _) as term -> term
   | App (left, argument) ->
-      match eval_weak left with
-      | Lam body -> eval_weak (body (eval_weak argument))
-      | left' -> App (left', eval_weak argument)
+      match eval left with
+      | Lam body -> eval (body (eval argument))
+      | left' -> App (left', eval argument)
 
 let identity = Lam (fun value -> value)
 let church n =
