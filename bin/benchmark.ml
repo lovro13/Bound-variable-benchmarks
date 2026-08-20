@@ -15,29 +15,119 @@ let print_times name heading times =
     name heading
     (List.fold_left ( +. ) 0. times *. 1_000.)
 
+let rec assert_naive_capture_body index = function
+  | Naive.App (Naive.Var variable, rest) ->
+      assert (variable = "a" ^ string_of_int index);
+      assert_naive_capture_body (index - 1) rest
+  | Naive.Var "y" -> assert (index = 0)
+  | _ -> assert false
+
+let rec assert_naive_lambdas remaining assert_body = function
+  | Naive.Lam (_, body) when remaining > 0 ->
+      assert_naive_lambdas (remaining - 1) assert_body body
+  | body when remaining = 0 -> assert_body body
+  | _ -> assert false
+
 let assert_naive_result test result =
-  match test, result with
-  | (0 | 2), Naive.Lam _ -> ()
-  | (1 | 3), Naive.Var "z" -> ()
+  match test with
+  | 0 -> assert_naive_lambdas 100 (assert_naive_capture_body 100) result
+  | 2 ->
+      assert_naive_lambdas 500
+        (function Naive.Var "z" -> () | _ -> assert false)
+        result
+  | 1 | 3 ->
+      begin
+        match result with
+        | Naive.Var "z" -> ()
+        | _ -> assert false
+      end
+  | _ -> assert false
+
+let rec assert_debruijn_capture_body index = function
+  | Debruijn.App (Debruijn.Var variable, rest) ->
+      assert (variable = index);
+      assert_debruijn_capture_body (index - 1) rest
+  | Debruijn.Var variable -> assert (index = 99 && variable = 200)
+  | _ -> assert false
+
+let rec assert_debruijn_lambdas remaining assert_body = function
+  | Debruijn.Lam (_, body) when remaining > 0 ->
+      assert_debruijn_lambdas (remaining - 1) assert_body body
+  | body when remaining = 0 -> assert_body body
   | _ -> assert false
 
 let assert_debruijn_result test result =
-  match test, result with
-  | (0 | 2), Debruijn.Lam _ -> ()
-  | (1 | 3), Debruijn.Var 0 -> ()
+  match test with
+  | 0 -> assert_debruijn_lambdas 100 (assert_debruijn_capture_body 199) result
+  | 2 ->
+      assert_debruijn_lambdas 500
+        (function Debruijn.Var 500 -> () | _ -> assert false)
+        result
+  | 1 | 3 ->
+      begin
+        match result with
+        | Debruijn.Var 0 -> ()
+        | _ -> assert false
+      end
+  | _ -> assert false
+
+let rec assert_hoas_capture_body index = function
+  | Hoas.App (Hoas.Var variable, rest) ->
+      assert (variable = "a" ^ string_of_int index);
+      assert_hoas_capture_body (index - 1) rest
+  | Hoas.Var "y" -> assert (index = 0)
+  | _ -> assert false
+
+let rec assert_hoas_lambdas remaining assert_body = function
+  | Hoas.Lam body when remaining > 0 ->
+      assert_hoas_lambdas (remaining - 1) assert_body (body (Hoas.Var "probe"))
+  | body when remaining = 0 -> assert_body body
   | _ -> assert false
 
 let assert_hoas_result test result =
-  match test, result with
-  | (0 | 2), Hoas.Lam _ -> ()
-  | (1 | 3), Hoas.Var "z" -> ()
+  match test with
+  | 0 -> assert_hoas_lambdas 100 (assert_hoas_capture_body 100) result
+  | 2 ->
+      assert_hoas_lambdas 500
+        (function Hoas.Var "z" -> () | _ -> assert false)
+        result
+  | 1 | 3 ->
+      begin
+        match result with
+        | Hoas.Var "z" -> ()
+        | _ -> assert false
+      end
+  | _ -> assert false
+
+let rec assert_bindlib_capture_body index = function
+  | Bindlib_lambda.App (Bindlib_lambda.Var variable, rest) ->
+      assert (Bindlib.name_of variable = "a" ^ string_of_int index);
+      assert_bindlib_capture_body (index - 1) rest
+  | Bindlib_lambda.Var variable -> assert (index = 0 && Bindlib.name_of variable = "y")
+  | _ -> assert false
+
+let rec assert_bindlib_lambdas remaining assert_body = function
+  | Bindlib_lambda.Lam abstraction when remaining > 0 ->
+      let _, body = Bindlib.unbind abstraction in
+      assert_bindlib_lambdas (remaining - 1) assert_body body
+  | body when remaining = 0 -> assert_body body
   | _ -> assert false
 
 let assert_bindlib_result test result =
-  match test, result with
-  | (0 | 2), Bindlib_lambda.Lam _ -> ()
-  | (1 | 3), Bindlib_lambda.Var variable ->
-    assert (Bindlib.name_of variable = "z")
+  match test with
+  | 0 -> assert_bindlib_lambdas 100 (assert_bindlib_capture_body 100) result
+  | 2 ->
+      assert_bindlib_lambdas 500
+        (function
+          | Bindlib_lambda.Var variable -> assert (Bindlib.name_of variable = "z")
+          | _ -> assert false)
+        result
+  | 1 | 3 ->
+      begin
+        match result with
+        | Bindlib_lambda.Var variable -> assert (Bindlib.name_of variable = "z")
+        | _ -> assert false
+      end
   | _ -> assert false
 
 let () =
