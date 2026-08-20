@@ -1,0 +1,7 @@
+(executable
+ (name main)
+ (libraries bindlib_lambda unix))
+
+(executable
+ (name benchmark)
+ (libraries bindlib_lambda unix))

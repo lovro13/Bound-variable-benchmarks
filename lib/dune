@@ -1,0 +1,4 @@
+(library
+ (name bindlib_lambda)
+ (wrapped false)
+ (libraries bindlib unix))

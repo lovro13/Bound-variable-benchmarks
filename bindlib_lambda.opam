@@ -1,0 +1,13 @@
+opam-version: "2.0"
+synopsis: "Lambda calculus with Bindlib"
+maintainer: ["lovro"]
+authors: ["lovro"]
+license: "MIT"
+depends: [
+  "ocaml" {>= "5.4"}
+  "dune" {>= "3.21"}
+  "bindlib"
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
